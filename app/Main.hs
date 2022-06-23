@@ -27,6 +27,16 @@ data Myお嬢様 r a where
   End :: Myお嬢様 r ()
   SyntaxError :: Myお嬢様 r ()
 
+instance Functor (Myお嬢様 r) where
+  fmap f (DefineFunc fn r) = DefineFunc fn (f r)
+  fmap f (DefineVariable name content r) = DefineVariable name content (f r)
+  fmap f (ReadVariable name r) = ReadVariable name (f r)
+  fmap f (Arg name r) = Arg name (f r)
+  fmap f (Return v r) = Return (v r)
+  fmap f EOL = EOL
+  fmap f End = End
+  fmap f SyntaxError = SyntaxError
+  
 
 data Keyword = Aありますの | Aといって | Aには何がありますの
   deriving (Eq, Ord)
