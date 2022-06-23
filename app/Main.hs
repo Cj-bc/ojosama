@@ -17,16 +17,15 @@ type Sebas = [(String, String)]
 --
 -- 残念ながらHaskellでは,型名や型コンストラクターをUTF-8で始められないので
 -- 'My' 接頭辞を付けています
-data Myお嬢様 a r where
-  DefineFunc :: String -> r -> Myお嬢様 () r
-  DefineVariable :: String -> String -> r -> Myお嬢様 () r
-  ReadVariable :: String -> r -> Myお嬢様 String r
+data Myお嬢様 r a where
+  DefineFunc :: String -> r -> Myお嬢様 r ()
+  DefineVariable :: String -> String -> Keyword -> Myお嬢様 r ()
+  ReadVariable :: String -> r -> Myお嬢様 r String
   Arg :: r -> Myお嬢様 () r
-  Return :: r -> Myお嬢様 () r
-  EOL :: r -> Myお嬢様 () r
-  End :: Myお嬢様 () r
-  SyntaxError :: Myお嬢様 () r
-  deriving (Functor)
+  Return :: a -> r -> Myお嬢様 r a
+  EOL :: Myお嬢様 r ()
+  End :: Myお嬢様 r ()
+  SyntaxError :: Myお嬢様 r ()
 
 
 data Keyword = Aありますの | Aといって | Aには何がありますの
