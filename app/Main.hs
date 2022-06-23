@@ -29,7 +29,7 @@ data Myお嬢様 a r where
   deriving (Functor)
 
 
-data LastWord = Aありますの | Aといって | Aには何がありますの
+data Keyword = Aありますの | Aといって | Aには何がありますの
   deriving (Eq, Ord)
 
 といって = Aといって
@@ -39,12 +39,12 @@ data LastWord = Aありますの | Aといって | Aには何がありますの
 -- | 変数を定義するわ。 文法ミスに気をつけることね
 --
 -- 変数定義の文法です。
-この部屋は :: String -> LastWord -> String -> LastWord -> Anお嬢様 ()
+この部屋は :: String -> Keyword -> String -> Keyword -> Anお嬢様 ()
 この部屋は thing といって content がありますの
   | といって == Aといって && がありますの == Aありますの = liftF $ DefineVariable thing content  ()
   | otherwise = liftF SyntaxError
 
-セバス :: String -> LastWord -> Anお嬢様 String
+セバス :: String -> Keyword -> Anお嬢様 String
 セバス roomName には何がありますの
     | には何がありますの == Aには何がありますの = liftF $ ReadVariable (const roomName) ()
     | otherwise = liftF SyntaxError
