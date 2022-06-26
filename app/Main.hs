@@ -1,33 +1,34 @@
-{-# LANGUAGE DeriveFunctor, GADTs #-}
+{-# LANGUAGE DeriveFunctor, GADTs, OverloadedStrings #-}
 module Main where
 import Control.Monad.Free
 import Control.Monad.State.Lazy
 import Control.Monad
 import Data.List (find)
+import Data.Text (Text)
 
--- data Sebas = Sebas { functions :: [String] }
+-- data Sebas = Sebas { functions :: [Text] }
 -- | セバスは執事ですわ。執事たるもの,わたくしの物全て管理するべきよね!
 --
 -- お嬢様が活動する際の全てのコンテクストを管理します。
 -- 現状は定義された変数名とその内容のみを保管していますが,
 -- 後々増えてきたらデータ型に再定義されます。
-type Sebas = [(String, String)]
+type Sebas = [(Text, Text)]
 
 -- | コンピューターには自然言語は難しいらしいから, 分かりやすくASTにしてあげたわ!
 --
 -- 残念ながらHaskellでは,型名や型コンストラクターをUTF-8で始められないので
 -- 'My' 接頭辞を付けています
--- data Myお嬢様 r = DefineFunc String r
---                 | DefineVariable String String r
---                 | ReadVariable String r
+-- data Myお嬢様 r = DefineFunc Text r
+--                 | DefineVariable Text Text r
+--                 | ReadVariable Text r
 --                 | Arg r
---                 | Return String r
+--                 | Return Text r
 --                 deriving (Functor)
 data Myお嬢様 r where
-  DefineFunc :: String -> (a -> b) -> r -> Myお嬢様  r
-  DefineVariable :: String -> String -> r ->  Myお嬢様  r
-  ReadVariable :: String -> r -> Myお嬢様  r
-  Output :: String -> r -> Myお嬢様 r
+  DefineFunc :: Text -> (a -> b) -> r -> Myお嬢様  r
+  DefineVariable :: Text -> Text -> r ->  Myお嬢様  r
+  ReadVariable :: Text -> r -> Myお嬢様  r
+  Output :: Text -> r -> Myお嬢様 r
   Arg :: r -> Myお嬢様  r
   Return :: a -> r -> Myお嬢様  r
 
@@ -51,22 +52,22 @@ data Keyword = Aありますの | Aといって | Aには何がありますの |
 -- | 変数を定義するわ。 文法ミスに気をつけることね
 --
 -- 変数定義の文法です。
-この部屋は :: String -> Keyword -> String -> Keyword -> Anお嬢様 ()
+この部屋は :: Text -> Keyword -> Text -> Keyword -> Anお嬢様 ()
 この部屋は thing といって content がありますの
   | といって == Aといって && がありますの == Aありますの = liftF $ DefineVariable thing content ()
   | otherwise = Pure ()
 
-セバス :: String -> Keyword -> Anお嬢様 (Maybe String)
+セバス :: Text -> Keyword -> Anお嬢様 (Maybe Text)
 セバス roomName には何がありますの
     | には何がありますの == Aには何がありますの = liftF $ ReadVariable roomName Nothing
     -- | には何がありますの == Aには何がありますの = Free . fmap return $ ReadVariable roomName Nothing
     -- | には何がありますの == Aには何がありますの = Free $ ReadVariable roomName (return Nothing)
     | otherwise = Pure Nothing
 
--- こちらの funcName 様は引数として arg をお受け取りになって次のことをなさいます :: String -> a -> Keyword -> (a -> b) -> Anお嬢様 (a -> b)
+-- こちらの funcName 様は引数として arg をお受け取りになって次のことをなさいます :: Text -> a -> Keyword -> (a -> b) -> Anお嬢様 (a -> b)
 
 
-みなさま :: String -> Keyword -> Anお嬢様 ()
+みなさま :: Text -> Keyword -> Anお嬢様 ()
 みなさま content ですわよ  | ですわよ == Aですわよ = liftF $ Output content ()
                            | otherwise = Pure ()
 -- もし = liftF If
@@ -113,7 +114,7 @@ type Anお嬢様 a = Free Myお嬢様 a
 
 main = void . flip ご案内しますわ [] $ do
   この部屋は "cat room" といって "cat" がありますの
-  whatsInsideCatRoom <- セバス "cat room" には何がありますの :: Free Myお嬢様 (Maybe String)
+  whatsInsideCatRoom <- セバス "cat room" には何がありますの :: Free Myお嬢様 (Maybe Text)
   この部屋は "Result" といって (maybe "" id whatsInsideCatRoom) がありますの
   Pure whatsInsideCatRoom
   
