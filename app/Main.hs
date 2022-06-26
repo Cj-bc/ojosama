@@ -17,14 +17,14 @@ type Sebas = [(String, String)]
 --
 -- 残念ながらHaskellでは,型名や型コンストラクターをUTF-8で始められないので
 -- 'My' 接頭辞を付けています
-data Myお嬢様 r a where
-  DefineFunc :: String -> r -> Myお嬢様 r ()
-  DefineVariable :: String -> String -> Keyword -> Myお嬢様 r ()
-  ReadVariable :: String -> r -> Myお嬢様 r String
-  Arg :: r -> Myお嬢様 () r
-  Return :: a -> r -> Myお嬢様 r a
+data Myお嬢様 r where
+  DefineFunc :: String -> r -> Myお嬢様 r
+  DefineVariable :: String -> String -> r ->  Myお嬢様 r
+  ReadVariable :: String -> r -> Myお嬢様 r
+  Arg :: r -> Myお嬢様 r
+  Return :: a -> r -> Myお嬢様 r
 
-instance Functor (Myお嬢様 r) where
+instance Functor Myお嬢様 where
   fmap f (DefineFunc fn r) = DefineFunc fn (f r)
   fmap f (DefineVariable name content r) = DefineVariable name content (f r)
   fmap f (ReadVariable name r) = ReadVariable name (f r)
@@ -66,12 +66,12 @@ data Keyword = Aありますの | Aといって | Aには何がありますの
 --
 -- Freeモナドに包まれたお嬢様です。
 -- 具象化されているのに不定冠詞に変わっていますね。不思議なこともあるものです。
-type Anお嬢様 a = Free (Myお嬢様 a) a
 
 -- | わたくしのお屋敷のことはセバスが何でも知ってるわ!
 --
 -- まぁ見ての通りです。
 type O屋敷 a = State Sebas a
+type Anお嬢様 a = Free Myお嬢様 a
 
 -- | 走らせるですわ!
 --
