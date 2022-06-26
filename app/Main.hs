@@ -27,6 +27,7 @@ data Myお嬢様 r where
   DefineFunc :: String -> (a -> b) -> r -> Myお嬢様  r
   DefineVariable :: String -> String -> r ->  Myお嬢様  r
   ReadVariable :: String -> r -> Myお嬢様  r
+  Output :: String -> r -> Myお嬢様 r
   Arg :: r -> Myお嬢様  r
   Return :: a -> r -> Myお嬢様  r
 
@@ -34,16 +35,18 @@ instance Functor Myお嬢様 where
   fmap f (DefineFunc fn body r) = DefineFunc fn body (f r)
   fmap f (DefineVariable name content r) = DefineVariable name content (f r)
   fmap f (ReadVariable name r) = ReadVariable name (f r)
+  fmap f (Output content r) = Output content (f r)
   fmap f (Arg r) = Arg (f r)
   fmap f (Return v r) = Return v (f r)
   
 
-data Keyword = Aありますの | Aといって | Aには何がありますの
+data Keyword = Aありますの | Aといって | Aには何がありますの | Aですわよ
   deriving (Eq, Ord)
 
 といって = Aといって
 がありますの = Aありますの
 には何がありますの  = Aには何がありますの
+ですわよ = Aですわよ
 
 -- | 変数を定義するわ。 文法ミスに気をつけることね
 --
@@ -63,6 +66,9 @@ data Keyword = Aありますの | Aといって | Aには何がありますの
 -- こちらの funcName 様は引数として arg をお受け取りになって次のことをなさいます :: String -> a -> Keyword -> (a -> b) -> Anお嬢様 (a -> b)
 
 
+みなさま :: String -> Keyword -> Anお嬢様 ()
+みなさま content ですわよ  | ですわよ == Aですわよ = liftF $ Output content ()
+                           | otherwise = Pure ()
 -- もし = liftF If
 -- でしたら = liftF Else
 -- お返しするのは = liftF Return
