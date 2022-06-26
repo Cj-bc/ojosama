@@ -5,6 +5,7 @@ import Control.Monad.State.Lazy
 import Control.Monad
 import Data.List (find)
 import Data.Text (Text)
+import qualified Data.Text as T
 
 -- data Sebas = Sebas { functions :: [Text] }
 -- | セバスは執事ですわ。執事たるもの,わたくしの物全て管理するべきよね!
@@ -102,7 +103,7 @@ type Anお嬢様 a = Free Myお嬢様 a
     in ご案内しますわ r sebas
     -- in ご案内しますわ (Pure val) sebas
   (Free (Output content r)) -> do
-    print content
+    putStrLn $ T.unpack content
     ご案内しますわ r sebas
     
   -- (Arg r) -> 
