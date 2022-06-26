@@ -17,19 +17,25 @@ type Sebas = [(String, String)]
 --
 -- 残念ながらHaskellでは,型名や型コンストラクターをUTF-8で始められないので
 -- 'My' 接頭辞を付けています
+-- data Myお嬢様 r = DefineFunc String r
+--                 | DefineVariable String String r
+--                 | ReadVariable String r
+--                 | Arg r
+--                 | Return String r
+--                 deriving (Functor)
 data Myお嬢様 r where
-  DefineFunc :: String -> r -> Myお嬢様 r
-  DefineVariable :: String -> String -> r ->  Myお嬢様 r
-  ReadVariable :: String -> r -> Myお嬢様 r
-  Arg :: r -> Myお嬢様 r
-  Return :: a -> r -> Myお嬢様 r
+  DefineFunc :: String -> (a -> b) -> r -> Myお嬢様  r
+  DefineVariable :: String -> String -> r ->  Myお嬢様  r
+  ReadVariable :: String -> r -> Myお嬢様  r
+  Arg :: r -> Myお嬢様  r
+  Return :: a -> r -> Myお嬢様  r
 
 instance Functor Myお嬢様 where
-  fmap f (DefineFunc fn r) = DefineFunc fn (f r)
+  fmap f (DefineFunc fn body r) = DefineFunc fn body (f r)
   fmap f (DefineVariable name content r) = DefineVariable name content (f r)
   fmap f (ReadVariable name r) = ReadVariable name (f r)
-  fmap f (Arg name r) = Arg name (f r)
-  fmap f (Return v r) = Return (v r)
+  fmap f (Arg r) = Arg (f r)
+  fmap f (Return v r) = Return v (f r)
   
 
 data Keyword = Aありますの | Aといって | Aには何がありますの
@@ -44,13 +50,18 @@ data Keyword = Aありますの | Aといって | Aには何がありますの
 -- 変数定義の文法です。
 この部屋は :: String -> Keyword -> String -> Keyword -> Anお嬢様 ()
 この部屋は thing といって content がありますの
-  | といって == Aといって && がありますの == Aありますの = liftF $ DefineVariable thing content  ()
+  | といって == Aといって && がありますの == Aありますの = liftF $ DefineVariable thing content ()
   | otherwise = Pure ()
 
-セバス :: String -> Keyword -> Anお嬢様 String
+セバス :: String -> Keyword -> Anお嬢様 (Maybe String)
 セバス roomName には何がありますの
-    | には何がありますの == Aには何がありますの = liftF $ ReadVariable (const roomName) ()
-    | otherwise = Pure ""
+    | には何がありますの == Aには何がありますの = liftF $ ReadVariable roomName Nothing
+    -- | には何がありますの == Aには何がありますの = Free . fmap return $ ReadVariable roomName Nothing
+    -- | には何がありますの == Aには何がありますの = Free $ ReadVariable roomName (return Nothing)
+    | otherwise = Pure Nothing
+
+-- こちらの funcName 様は引数として arg をお受け取りになって次のことをなさいます :: String -> a -> Keyword -> (a -> b) -> Anお嬢様 (a -> b)
+
 
 -- もし = liftF If
 -- でしたら = liftF Else
@@ -66,11 +77,6 @@ data Keyword = Aありますの | Aといって | Aには何がありますの
 --
 -- Freeモナドに包まれたお嬢様です。
 -- 具象化されているのに不定冠詞に変わっていますね。不思議なこともあるものです。
-
--- | わたくしのお屋敷のことはセバスが何でも知ってるわ!
---
--- まぁ見ての通りです。
-type O屋敷 a = State Sebas a
 type Anお嬢様 a = Free Myお嬢様 a
 
 -- | 走らせるですわ!
@@ -81,23 +87,27 @@ type Anお嬢様 a = Free Myお嬢様 a
   -- (DefineFunc fn r) -> do
   --   modify (\sebas -> (fn, ""):sebas)
   --   ご案内しますわ r
-  (Free (DefineVariable name content r)) -> do
+  (Free (DefineVariable name content r)) ->
     let s = (name, content):sebas
-    ご案内しますわ r s
-  (Free (ReadVariable name r)) -> do
-    var <- maybe "" snd $ find (\c -> fst c == name) sebas
-    return var
+    in ご案内しますわ r s
+  (Free (ReadVariable roomName r)) ->
+    let val = fmap snd $ find (\c -> fst c == roomName) sebas
+    in ご案内しますわ r sebas
+    -- in ご案内しますわ (Pure val) sebas
     
   -- (Arg r) -> 
   -- Return Sebas r
   -- EOL Sebas r -> ご案内しますわ r
-  (Pure _) -> get >>= return
+  -- (Free End) -> sebas
+  (Pure a) -> a
   _ -> error "誰ですの!？わたくし知りませんわ!"
 
-main = print . flip execState [] . ご案内しますわ $ do
+main = print . flip ご案内しますわ [] $ do
   この部屋は "cat room" といって "cat" がありますの
+  whatsInsideCatRoom <- セバス "cat room" には何がありますの :: Free Myお嬢様 (Maybe String)
+  この部屋は "Result" といって (maybe "" id whatsInsideCatRoom) がありますの
+  Pure whatsInsideCatRoom
   
-  --whatsInsideCatRoom <- セバス "cat room" には何がありますの
   -- お屋敷には "ねこ" がいましてよ
   -- 以上ですの
   -- こちらの fib 様は 引数として n をお受け取りになって 次のことをなさいます $
