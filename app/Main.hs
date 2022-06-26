@@ -88,7 +88,7 @@ type Anお嬢様 a = Free Myお嬢様 a
 -- | 走らせるですわ!
 --
 -- お嬢様言葉のインタープリターです
-ご案内しますわ :: Anお嬢様 a -> Sebas -> a
+ご案内しますわ :: Anお嬢様 a -> Sebas -> IO a
 ご案内しますわ f sebas = case f of
   -- (DefineFunc fn r) -> do
   --   modify (\sebas -> (fn, ""):sebas)
@@ -100,15 +100,18 @@ type Anお嬢様 a = Free Myお嬢様 a
     let val = fmap snd $ find (\c -> fst c == roomName) sebas
     in ご案内しますわ r sebas
     -- in ご案内しますわ (Pure val) sebas
+  (Free (Output content r)) -> do
+    print content
+    ご案内しますわ r sebas
     
   -- (Arg r) -> 
   -- Return Sebas r
   -- EOL Sebas r -> ご案内しますわ r
   -- (Free End) -> sebas
-  (Pure a) -> a
+  (Pure a) -> return a
   _ -> error "誰ですの!？わたくし知りませんわ!"
 
-main = print . flip ご案内しますわ [] $ do
+main = void . flip ご案内しますわ [] $ do
   この部屋は "cat room" といって "cat" がありますの
   whatsInsideCatRoom <- セバス "cat room" には何がありますの :: Free Myお嬢様 (Maybe String)
   この部屋は "Result" といって (maybe "" id whatsInsideCatRoom) がありますの
