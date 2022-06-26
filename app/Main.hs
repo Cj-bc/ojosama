@@ -76,7 +76,7 @@ type Anお嬢様 a = Free Myお嬢様 a
 -- | 走らせるですわ!
 --
 -- お嬢様言葉のインタープリターです
-ご案内しますわ :: Anお嬢様 a -> Sebas -> IO a
+ご案内しますわ :: Anお嬢様 a -> Sebas -> a
 ご案内しますわ f sebas = case f of
   -- (DefineFunc fn r) -> do
   --   modify (\sebas -> (fn, ""):sebas)
