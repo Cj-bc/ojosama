@@ -23,9 +23,6 @@ data Myお嬢様 r a where
   ReadVariable :: String -> r -> Myお嬢様 r String
   Arg :: r -> Myお嬢様 () r
   Return :: a -> r -> Myお嬢様 r a
-  EOL :: Myお嬢様 r ()
-  End :: Myお嬢様 r ()
-  SyntaxError :: Myお嬢様 r ()
 
 instance Functor (Myお嬢様 r) where
   fmap f (DefineFunc fn r) = DefineFunc fn (f r)
@@ -33,9 +30,6 @@ instance Functor (Myお嬢様 r) where
   fmap f (ReadVariable name r) = ReadVariable name (f r)
   fmap f (Arg name r) = Arg name (f r)
   fmap f (Return v r) = Return (v r)
-  fmap f EOL = EOL
-  fmap f End = End
-  fmap f SyntaxError = SyntaxError
   
 
 data Keyword = Aありますの | Aといって | Aには何がありますの
@@ -51,19 +45,20 @@ data Keyword = Aありますの | Aといって | Aには何がありますの
 この部屋は :: String -> Keyword -> String -> Keyword -> Anお嬢様 ()
 この部屋は thing といって content がありますの
   | といって == Aといって && がありますの == Aありますの = liftF $ DefineVariable thing content  ()
-  | otherwise = liftF SyntaxError
+  | otherwise = Pure ()
 
 セバス :: String -> Keyword -> Anお嬢様 String
 セバス roomName には何がありますの
     | には何がありますの == Aには何がありますの = liftF $ ReadVariable (const roomName) ()
-    | otherwise = liftF SyntaxError
+    | otherwise = Pure ""
 
 -- もし = liftF If
 -- でしたら = liftF Else
 -- お返しするのは = liftF Return
 -- ですわ = liftF EOL ()
-以上ですわ :: Anお嬢様 Sebas
-以上ですわ = liftF End
+
+以上ですわ :: Anお嬢様 ()
+以上ですわ = Pure ()
 
 -- 次のことをなさいます = 
 
@@ -96,8 +91,6 @@ type O屋敷 a = State Sebas a
   -- (Arg r) -> 
   -- Return Sebas r
   -- EOL Sebas r -> ご案内しますわ r
-  (Free SyntaxError) -> get >>= return
-  (Free End) -> get >>= return
   (Pure _) -> get >>= return
   _ -> error "誰ですの!？わたくし知りませんわ!"
 
