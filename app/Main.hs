@@ -15,31 +15,33 @@ import qualified Data.Text as T
 -- 後々増えてきたらデータ型に再定義されます。
 type Sebas = [(Text, Text)]
 
+
 -- | コンピューターには自然言語は難しいらしいから, 分かりやすくASTにしてあげたわ!
 --
 -- 残念ながらHaskellでは,型名や型コンストラクターをUTF-8で始められないので
 -- 'My' 接頭辞を付けています
--- data Myお嬢様 r = DefineFunc Text r
---                 | DefineVariable Text Text r
---                 | ReadVariable Text r
---                 | Arg r
---                 | Return Text r
---                 deriving (Functor)
-data Myお嬢様 r where
-  DefineFunc :: Text -> (a -> b) -> r -> Myお嬢様  r
-  DefineVariable :: Text -> Text -> r ->  Myお嬢様  r
-  ReadVariable :: Text -> r -> Myお嬢様  r
-  Output :: Text -> r -> Myお嬢様 r
-  Arg :: r -> Myお嬢様  r
-  Return :: a -> r -> Myお嬢様  r
-
-instance Functor Myお嬢様 where
-  fmap f (DefineFunc fn body r) = DefineFunc fn body (f r)
-  fmap f (DefineVariable name content r) = DefineVariable name content (f r)
-  fmap f (ReadVariable name r) = ReadVariable name (f r)
-  fmap f (Output content r) = Output content (f r)
-  fmap f (Arg r) = Arg (f r)
-  fmap f (Return v r) = Return v (f r)
+data Myお嬢様 r = DefineFunc Text r
+                | DefineVariable Text Text r
+                | ReadVariable Text r
+                | Arg r
+                | Output Text r
+                | Return Text r
+                deriving (Functor)
+-- data Myお嬢様 r where
+--   DefineFunc :: Text -> (a -> b) -> r -> Myお嬢様  r
+--   DefineVariable :: Text -> Text -> r ->  Myお嬢様  r
+--   ReadVariable :: (Sebas -> Maybe Text) -> r -> Myお嬢様  r
+--   Output :: Text -> r -> Myお嬢様 r
+--   Arg :: r -> Myお嬢様  r
+--   Return :: a -> r -> Myお嬢様  r
+-- 
+-- instance Functor Myお嬢様 where
+--   fmap f (DefineFunc fn body r) = DefineFunc fn body (f r)
+--   fmap f (DefineVariable name content r) = DefineVariable name content (f r)
+--   fmap f (ReadVariable name r) = ReadVariable name (f r)
+--   fmap f (Output content r) = Output content (f r)
+--   fmap f (Arg r) = Arg (f r)
+--   fmap f (Return v r) = Return v (f r)
   
 
 data Keyword = Aありますの | Aといって | Aには何がありますの | Aですわよ
@@ -58,12 +60,12 @@ data Keyword = Aありますの | Aといって | Aには何がありますの |
   | といって == Aといって && がありますの == Aありますの = liftF $ DefineVariable thing content ()
   | otherwise = Pure ()
 
-セバス :: Text -> Keyword -> Anお嬢様 (Maybe Text)
+セバス :: Text -> Keyword -> Free Myお嬢様 ()
 セバス roomName には何がありますの
-    | には何がありますの == Aには何がありますの = liftF $ ReadVariable roomName Nothing
-    -- | には何がありますの == Aには何がありますの = Free . fmap return $ ReadVariable roomName Nothing
-    -- | には何がありますの == Aには何がありますの = Free $ ReadVariable roomName (return Nothing)
-    | otherwise = Pure Nothing
+    | には何がありますの == Aには何がありますの = liftF $ ReadVariable getValue ()
+    | otherwise = Pure ()
+    where
+      getValue sebas = fmap snd $ find (\c -> fst c == roomName) sebas
 
 -- こちらの funcName 様は引数として arg をお受け取りになって次のことをなさいます :: Text -> a -> Keyword -> (a -> b) -> Anお嬢様 (a -> b)
 
@@ -98,9 +100,9 @@ type Anお嬢様 a = Free Myお嬢様 a
   (Free (DefineVariable name content r)) ->
     let s = (name, content):sebas
     in ご案内しますわ r s
-  (Free (ReadVariable roomName r)) ->
-    let val = fmap snd $ find (\c -> fst c == roomName) sebas
-    in ご案内しますわ r sebas
+  (Free (ReadVariable retrive r)) -> do
+    -- Pure $ retrive sebas
+    ご案内しますわ (Pure $ retrive sebas) sebas
     -- in ご案内しますわ (Pure val) sebas
   (Free (Output content r)) -> do
     putStrLn $ T.unpack content
@@ -115,9 +117,9 @@ type Anお嬢様 a = Free Myお嬢様 a
 
 main = void . flip ご案内しますわ [] $ do
   この部屋は "cat room" といって "cat" がありますの
-  whatsInsideCatRoom <- セバス "cat room" には何がありますの :: Free Myお嬢様 (Maybe Text)
-  この部屋は "Result" といって (maybe "" id whatsInsideCatRoom) がありますの
-  Pure whatsInsideCatRoom
+  whatsInsideCatRoom <- セバス "cat room" には何がありますの
+  みなさま (maybe "" (flip T.append " ですわ!みなさま~!!") "a") ですわよ
+  -- この部屋は "Result" といって (maybe "" "atta" whatsInsideCatRoom) がありますの
   
   -- お屋敷には "ねこ" がいましてよ
   -- 以上ですの
