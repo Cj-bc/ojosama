@@ -52,42 +52,8 @@ data Keyword = Aありますの | Aといって | Aには何がありますの |
 -- お返しするのは = liftF Return
 -- ですわ = liftF EOL ()
 
-以上ですわ :: Anお嬢様 ()
-以上ですわ = Pure ()
 
--- 次のことをなさいます = 
 
--- | わたくしのことよ!
---
--- Freeモナドに包まれたお嬢様です。
--- 具象化されているのに不定冠詞に変わっていますね。不思議なこともあるものです。
-type Anお嬢様 a = Free Myお嬢様 a
-
--- | 走らせるですわ!
---
--- お嬢様言葉のインタープリターです
-ご案内しますわ :: Anお嬢様 a -> Sebas -> IO a
-ご案内しますわ f sebas = case f of
-  -- (DefineFunc fn r) -> do
-  --   modify (\sebas -> (fn, ""):sebas)
-  --   ご案内しますわ r
-  (Free (DefineVariable name content r)) ->
-    let s = (name, content):sebas
-    in ご案内しますわ r s
-  (Free (ReadVariable retrive r)) -> do
-    -- Pure $ retrive sebas
-    ご案内しますわ (Pure $ retrive sebas) sebas
-    -- in ご案内しますわ (Pure val) sebas
-  (Free (Output content r)) -> do
-    putStrLn $ T.unpack content
-    ご案内しますわ r sebas
-    
-  -- (Arg r) -> 
-  -- Return Sebas r
-  -- EOL Sebas r -> ご案内しますわ r
-  -- (Free End) -> sebas
-  (Pure a) -> return a
-  _ -> error "誰ですの!？わたくし知りませんわ!"
 
 main = void . flip ご案内しますわ [] $ do
   この部屋は "cat room" といって "cat" がありますの
