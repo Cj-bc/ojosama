@@ -31,22 +31,25 @@ data Keyword = Aありますの | Aといって | Aには何がありますの |
 -- 変数定義の文法です。
 この部屋は :: Text -> Keyword -> Text -> Keyword -> StateT Sebas IO ()
 この部屋は thing といって content がありますの
-  | といって == Aといって && がありますの == Aありますの = liftF $ DefineVariable thing content ()
-  | otherwise = Pure ()
+  | といって == Aといって && がありますの == Aありますの = modify addVal
+  | otherwise = return ()
+  where
+    val = (thing, content)
+    addVal sebas = val:sebas
 
 セバス :: Text -> Keyword -> StateT Sebas IO (Maybe Text)
 セバス roomName には何がありますの
-    | には何がありますの == Aには何がありますの = liftF $ ReadVariable getValue ()
-    | otherwise = Pure ()
-    where
-      getValue sebas = fmap snd $ find (\c -> fst c == roomName) sebas
+  | には何がありますの == Aには何がありますの = gets getValue
+  | otherwise = return Nothing
+  where
+    getValue sebas = fmap snd $ find (\c -> fst c == roomName) sebas
 
 -- こちらの funcName 様は引数として arg をお受け取りになって次のことをなさいます :: Text -> a -> Keyword -> (a -> b) -> Anお嬢様 (a -> b)
 
 
-みなさま :: Text -> Keyword -> Anお嬢様 ()
-みなさま content ですわよ  | ですわよ == Aですわよ = liftF $ Output content ()
-                           | otherwise = Pure ()
+みなさま :: Text -> Keyword -> StateT Sebas IO ()
+みなさま content ですわよ  | ですわよ == Aですわよ = liftIO (putStrLn . T.unpack $ content)
+                           | otherwise = return ()
 -- もし = liftF If
 -- でしたら = liftF Else
 -- お返しするのは = liftF Return
