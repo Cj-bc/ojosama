@@ -15,34 +15,8 @@ import qualified Data.Text as T
 -- 後々増えてきたらデータ型に再定義されます。
 type Sebas = [(Text, Text)]
 
+type Myお嬢様 a = StateT Sebas IO a
 
--- | コンピューターには自然言語は難しいらしいから, 分かりやすくASTにしてあげたわ!
---
--- 残念ながらHaskellでは,型名や型コンストラクターをUTF-8で始められないので
--- 'My' 接頭辞を付けています
-data Myお嬢様 r = DefineFunc Text r
-                | DefineVariable Text Text r
-                | ReadVariable Text r
-                | Arg r
-                | Output Text r
-                | Return Text r
-                deriving (Functor)
--- data Myお嬢様 r where
---   DefineFunc :: Text -> (a -> b) -> r -> Myお嬢様  r
---   DefineVariable :: Text -> Text -> r ->  Myお嬢様  r
---   ReadVariable :: (Sebas -> Maybe Text) -> r -> Myお嬢様  r
---   Output :: Text -> r -> Myお嬢様 r
---   Arg :: r -> Myお嬢様  r
---   Return :: a -> r -> Myお嬢様  r
--- 
--- instance Functor Myお嬢様 where
---   fmap f (DefineFunc fn body r) = DefineFunc fn body (f r)
---   fmap f (DefineVariable name content r) = DefineVariable name content (f r)
---   fmap f (ReadVariable name r) = ReadVariable name (f r)
---   fmap f (Output content r) = Output content (f r)
---   fmap f (Arg r) = Arg (f r)
---   fmap f (Return v r) = Return v (f r)
-  
 
 data Keyword = Aありますの | Aといって | Aには何がありますの | Aですわよ
   deriving (Eq, Ord)
@@ -55,12 +29,12 @@ data Keyword = Aありますの | Aといって | Aには何がありますの |
 -- | 変数を定義するわ。 文法ミスに気をつけることね
 --
 -- 変数定義の文法です。
-この部屋は :: Text -> Keyword -> Text -> Keyword -> Anお嬢様 ()
+この部屋は :: Text -> Keyword -> Text -> Keyword -> StateT Sebas IO ()
 この部屋は thing といって content がありますの
   | といって == Aといって && がありますの == Aありますの = liftF $ DefineVariable thing content ()
   | otherwise = Pure ()
 
-セバス :: Text -> Keyword -> Free Myお嬢様 ()
+セバス :: Text -> Keyword -> StateT Sebas IO (Maybe Text)
 セバス roomName には何がありますの
     | には何がありますの == Aには何がありますの = liftF $ ReadVariable getValue ()
     | otherwise = Pure ()
