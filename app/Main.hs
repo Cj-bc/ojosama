@@ -17,14 +17,16 @@ type Sebas = [(Text, Text)]
 
 type Myお嬢様 a = StateT Sebas IO a
 
-
-data Keyword = Aありますの | Aといって | Aには何がありますの | Aですわよ
+data Keyword = Aありますの | Aといって | Aには何がありますの | Aですわよ | Aでしたら | Aですわ | Aそうでなければ
   deriving (Eq, Ord)
 
 といって = Aといって
 がありますの = Aありますの
 には何がありますの  = Aには何がありますの
 ですわよ = Aですわよ
+でしたら = Aでしたら
+ですわ = Aですわ
+そうでなければ = Aそうでなければ
 
 -- | 変数を定義するわ。 文法ミスに気をつけることね
 --
@@ -55,6 +57,11 @@ data Keyword = Aありますの | Aといって | Aには何がありますの |
 -- お返しするのは = liftF Return
 -- ですわ = liftF EOL ()
 
+もし :: Bool -> Keyword -> Myお嬢様 a -> Keyword -> Myお嬢様 a -> Myお嬢様 a
+もし condition でしたら ifTrue そうでなければ ifFalse
+  | でしたら == Aでしたら
+    && そうでなければ == Aそうでなければ = if condition then ifTrue else ifFalse
+  | otherwise = ifFalse
 
 
 
