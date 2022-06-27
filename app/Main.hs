@@ -63,12 +63,22 @@ data Keyword = Aありますの | Aといって | Aには何がありますの |
     && そうでなければ == Aそうでなければ = if condition then ifTrue else ifFalse
   | otherwise = ifFalse
 
-
-
-main = void . flip ご案内しますわ [] $ do
+main = flip execStateT [] $ do
   この部屋は "cat room" といって "cat" がありますの
   whatsInsideCatRoom <- セバス "cat room" には何がありますの
-  みなさま (maybe "" (flip T.append " ですわ!みなさま~!!") "a") ですわよ
+  みなさま (maybe "" (flip T.append " ですわ!みなさま~!!") whatsInsideCatRoom) ですわよ
+
+  もし (whatsInsideCatRoom == (Just "cat")) でしたら
+    (みなさま "猫が!猫がおりますわよ~!" ですわよ)
+    そうでなければ (みなさま "猫が...猫がおりませんのよ!?" ですわよ)
+
+  この部屋は "cat room" といって "dog" がありますの
+  whatsInsideCatRoom <- セバス "cat room" には何がありますの
+
+  もし (whatsInsideCatRoom == (Just "cat")) でしたら
+    (みなさま "猫が!猫がおりますわよ~!" ですわよ)
+    そうでなければ (みなさま "猫が...猫がおりませんのよ!?" ですわよ)
+
   -- この部屋は "Result" といって (maybe "" "atta" whatsInsideCatRoom) がありますの
   
   -- お屋敷には "ねこ" がいましてよ
