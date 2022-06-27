@@ -7,7 +7,6 @@ import Data.List (find)
 import Data.Text (Text)
 import qualified Data.Text as T
 
--- data Sebas = Sebas { functions :: [Text] }
 -- | セバスは執事ですわ。執事たるもの,わたくしの物全て管理するべきよね!
 --
 -- お嬢様が活動する際の全てのコンテクストを管理します。
@@ -52,10 +51,6 @@ data Keyword = Aありますの | Aといって | Aには何がありますの |
 みなさま :: Text -> Keyword -> StateT Sebas IO ()
 みなさま content ですわよ  | ですわよ == Aですわよ = liftIO (putStrLn . T.unpack $ content)
                            | otherwise = return ()
--- もし = liftF If
--- でしたら = liftF Else
--- お返しするのは = liftF Return
--- ですわ = liftF EOL ()
 
 もし :: Bool -> Keyword -> Myお嬢様 a -> Keyword -> Myお嬢様 a -> Myお嬢様 a
 もし condition でしたら ifTrue そうでなければ ifFalse
@@ -78,12 +73,3 @@ main = flip execStateT [] $ do
   もし (whatsInsideCatRoom == (Just "cat")) でしたら
     (みなさま "猫が!猫がおりますわよ~!" ですわよ)
     そうでなければ (みなさま "猫が...猫がおりませんのよ!?" ですわよ)
-
-  -- この部屋は "Result" といって (maybe "" "atta" whatsInsideCatRoom) がありますの
-  
-  -- お屋敷には "ねこ" がいましてよ
-  -- 以上ですの
-  -- こちらの fib 様は 引数として n をお受け取りになって 次のことをなさいます $
-  --   もし n == 0 でしたら お返しするのは 1 ですわ
-
-  --   以上ですわ
